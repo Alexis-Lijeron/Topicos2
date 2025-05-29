@@ -103,11 +103,15 @@ def detectar_intenciones(historial):
     prompt_final = {
         "role": "user",
         "content": (
-            "Con base en la conversación anterior, dime los productos, promociones y categorías mencionadas. "
-            "Devuélvelo en formato JSON con estas claves: 'productos', 'categorias', 'promociones'. "
-            'Ejemplo: {"productos": ["Sticker Retro"], "categorias": ["Stickers"], "promociones": ["Vuelta al cole"]}'
+            "Analiza la conversación anterior entre un cliente y un asistente. "
+            "Devuélveme solo los productos, categorías y promociones en las que el cliente mostró interés real "
+            "(por ejemplo: pidió más información, preguntó precio, promociones, stock, dijo que le interesa, etc.). "
+            "Ignora las menciones que sean solo parte de una lista informativa o respuesta general. "
+            "Devuélvelo en formato JSON como este ejemplo:\n\n"
+            '{"productos": ["Agenda Ahorrativa"], "categorias": ["Agendas"], "promociones": ["Promo Verano"]}'
         ),
     }
+
     historial.append(prompt_final)
 
     respuesta = client.chat.completions.create(
@@ -115,8 +119,7 @@ def detectar_intenciones(historial):
     )
     return respuesta.choices[0].message.content.strip()
 
-
-#def guardar_intereses(chat_id, data):
+    # def guardar_intereses(chat_id, data):
     try:
         datos = json.loads(data)
     except json.JSONDecodeError:
@@ -198,6 +201,8 @@ def detectar_intenciones(historial):
 
     conn.commit()
     conn.close()
+
+
 def guardar_intereses(chat_id, data):
     try:
         datos = json.loads(data)
