@@ -1,3 +1,4 @@
+from datetime import datetime 
 import os
 import re
 import psycopg2
@@ -115,15 +116,19 @@ def guardar_mensaje(chat_id, contenido, emisor="cliente", tipo="texto"):
     conn.commit()
     conn.close()
 
+
 def reconstruir_historial(chat_id):
     conn = conectar_bd()
     cur = conn.cursor()
-    cur.execute("""
+    cur.execute(
+        """
         SELECT emisor, contenido
         FROM Mensaje
         WHERE chat_id = %s
         ORDER BY fecha_envio ASC;
-    """, (chat_id,))
+    """,
+        (chat_id,),
+    )
     mensajes = cur.fetchall()
     conn.close()
 
@@ -137,6 +142,7 @@ def reconstruir_historial(chat_id):
 
     return historial
 
+
 def registrar_interes(chat_id, producto_id):
     conn = conectar_bd()
     cur = conn.cursor()
@@ -149,6 +155,29 @@ def registrar_interes(chat_id, producto_id):
     )
     conn.commit()
     conn.close()
+
+
+def ya_saludo_hoy(chat_id):
+    conn = conectar_bd()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT contenido, fecha_envio::date
+        FROM Mensaje
+        WHERE chat_id = %s AND emisor = 'sistema'
+        ORDER BY fecha_envio DESC
+        LIMIT 1;
+    """,
+        (chat_id,),
+    )
+    mensaje = cur.fetchone()
+    conn.close()
+
+    if not mensaje:
+        return False
+
+    hoy = datetime.now().date()
+    return mensaje["fecha_envio"] == hoy and "hola" in mensaje["contenido"].lower()
 
 
 # === CONSULTA INTELIGENTE A BD ===
@@ -255,15 +284,16 @@ def whatsapp():
         chat_id, nombre_cliente = obtener_chat_id(user_number)
         guardar_mensaje(chat_id, incoming_msg, emisor="cliente")
 
+        # Reconstrucción persistente
         if numero_completo not in conversaciones:
-            conversaciones[numero_completo] = [
-                {"role": "system", "content": contexto_negocio}
-            ]
-            saludo = f"¡Hola {nombre_cliente}! 😊 ¿En qué podemos ayudarte hoy?"
-            guardar_mensaje(chat_id, saludo, emisor="sistema")
-            msg.body(saludo)
-            print("👋 Se envió saludo inicial.")
-            return Response(str(resp), content_type="application/xml")
+            historial = reconstruir_historial(chat_id)
+            conversaciones[numero_completo] = historial
+            if not ya_saludo_hoy(chat_id):
+                saludo = f"¡Hola {nombre_cliente}! 😊 ¿En qué podemos ayudarte hoy?"
+                guardar_mensaje(chat_id, saludo, emisor="sistema")
+                msg.body(saludo)
+                print("👋 Se envió saludo inicial.")
+                return Response(str(resp), content_type="application/xml")
 
         # Consultar si se puede responder desde la BD
         respuesta_bd = consultar_producto(incoming_msg, chat_id=chat_id)
