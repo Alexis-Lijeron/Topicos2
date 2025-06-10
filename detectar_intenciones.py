@@ -18,8 +18,8 @@ def conectar_bd():
 def obtener_chats_del_dia():
     conn = conectar_bd()
     cur = conn.cursor()
-    hoy = datetime.now().date()
-    # hoy= "2025-05-22"
+    #hoy = datetime.now().date()
+    hoy= "2025-05-29"
     cur.execute(
         """
         SELECT DISTINCT c.id AS chat_id, cl.nombre, cl.telefono

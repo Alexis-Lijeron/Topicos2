@@ -149,6 +149,54 @@ def buscar_productos_embedding(pregunta):
     return docs
 
 
+def agregar_producto_carrito_en_memoria(
+    user_number, producto_id, nombre_producto, precio, cantidad=1
+):
+    if user_number not in conversaciones:
+        conversaciones[user_number] = {"nombre_cliente": "Invitado", "carrito": {}}
+
+    carrito = conversaciones[user_number]["carrito"]
+
+    if producto_id in carrito:
+        # Si el producto ya está en el carrito, actualizamos la cantidad
+        carrito[producto_id]["cantidad"] += cantidad
+    else:
+        # Si el producto no está en el carrito, lo agregamos
+        carrito[producto_id] = {
+            "nombre": nombre_producto,
+            "precio": precio,
+            "cantidad": cantidad,
+        }
+
+    return f"Producto {nombre_producto} agregado al carrito. Cantidad: {cantidad}."
+
+
+def ver_carrito_en_memoria(user_number):
+    if user_number not in conversaciones or not conversaciones[user_number]["carrito"]:
+        return "Tu carrito está vacío."
+
+    carrito = conversaciones[user_number]["carrito"]
+    total = 0
+    carrito_resumen = "Productos en tu carrito:\n"
+
+    for producto_id, producto in carrito.items():
+        subtotal = producto["precio"] * producto["cantidad"]
+        carrito_resumen += f"- {producto['nombre']} (Cantidad: {producto['cantidad']}, Precio: Bs. {producto['precio']}, Subtotal: Bs. {subtotal})\n"
+        total += subtotal
+
+    carrito_resumen += f"\nTotal: Bs. {total:.2f}"
+    return carrito_resumen
+
+def eliminar_producto_carrito_en_memoria(user_number, producto_id):
+    if user_number not in conversaciones or producto_id not in conversaciones[user_number]["carrito"]:
+        return "Este producto no está en tu carrito."
+
+    nombre_producto = conversaciones[user_number]["carrito"][producto_id]["nombre"]
+    del conversaciones[user_number]["carrito"][producto_id]
+
+    return f"Producto {nombre_producto} eliminado del carrito."
+
+
 def detectar_pregunta_general(texto):
     texto = texto.lower()
     if re.search(r"\b(productos|tienen|hay)\b", texto) and re.search(
@@ -451,7 +499,8 @@ La respuesta debe ser clara, en español, con viñetas o listas si es necesario.
     """.strip()
 
     respuesta = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        # model="gpt-3.5-turbo",
+        model="gpt-4o-mini",
         messages=[
             {
                 "role": "system",
@@ -462,9 +511,8 @@ La respuesta debe ser clara, en español, con viñetas o listas si es necesario.
     )
     return respuesta.choices[0].message.content.strip()
 
-
-#@app.route("/whatsapp", methods=["POST"])
-#def whatsapp():
+    # @app.route("/whatsapp", methods=["POST"])
+    # def whatsapp():
     try:
         numero_completo = request.values.get("From", "")
         user_number = numero_completo.replace("whatsapp:", "")
@@ -532,6 +580,7 @@ La respuesta debe ser clara, en español, con viñetas o listas si es necesario.
         )
         return Response(str(resp), content_type="application/xml")
 
+
 @app.route("/whatsapp", methods=["POST"])
 def whatsapp():
     try:
@@ -573,9 +622,12 @@ def whatsapp():
                 + "\n---\n".join(contexto)
                 + f"\n\nCliente: {incoming_msg}\nRespuesta:"
             )
-            conversaciones[numero_completo].append({"role": "user", "content": incoming_msg})
+            conversaciones[numero_completo].append(
+                {"role": "user", "content": incoming_msg}
+            )
             respuesta = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                # model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 messages=[
                     {
                         "role": "system",
@@ -595,8 +647,11 @@ def whatsapp():
     except Exception as e:
         print("❌ Error:", e)
         resp = MessagingResponse()
-        msg = resp.message("Ocurrió un error al procesar tu mensaje. Intenta nuevamente.")
+        msg = resp.message(
+            "Ocurrió un error al procesar tu mensaje. Intenta nuevamente."
+        )
         return Response(str(resp), content_type="application/xml")
+
 
 if __name__ == "__main__":
     app.run(debug=True)

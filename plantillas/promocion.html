@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual Papers Scz - Promociones</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    header {
+      background: #ffe3ef;
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 4px solid #ffc6dc;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #c13466;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .promo-banner {
+      background: #f9d6e4;
+      text-align: center;
+      padding: 1rem;
+      margin: 1rem auto;
+      border-radius: 8px;
+      color: #a72b52;
+      font-weight: bold;
+      max-width: 90%;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .promotion-title {
+      font-size: 1.5rem;
+      color: #ba2e5f;
+      margin: 2rem 0 0.5rem;
+      border-bottom: 2px solid #f3a6c7;
+      padding-bottom: 0.4rem;
+    }
+
+    .promotion-description {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .product-card {
+      width: 46%;
+      margin: 2%;
+      float: left;
+      border: 1px solid #f5bfd4;
+      border-radius: 12px;
+      background: #fff3f9;
+      padding: 1rem;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+    }
+
+    .product-card img {
+      display: block;
+      margin: 0 auto 0.8rem auto;
+      max-width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .product-card h3 {
+      font-size: 1.1rem;
+      color: #c73c6f;
+      margin: 0 0 0.3rem;
+      text-align: center;
+    }
+
+    .product-card .description {
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-card .price {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #962f51;
+      text-align: center;
+    }
+
+    footer {
+      clear: both;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #999;
+      margin-top: 3rem;
+      padding-bottom: 2rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Virtual Papers Scz</h1>
+    <p>Cliente: {{ nombre }} | Correo: {{ correo }}</p>
+  </header>
+
+  <div class="promo-banner">
+    Estas son las promociones que te interesaron. ¡Échales un nuevo vistazo!
+  </div>
+
+  <main>
+    {% for promocion in promociones %}
+    <div>
+      <h2 class="promotion-title">{{ promocion.promocion_nombre }}</h2>
+      <p class="promotion-description">{{ promocion.promocion_descripcion }}</p>
+
+      {% for producto in promocion.productos %}
+      <div class="product-card">
+        {% if producto.imagen_url %}
+        <img src="{{ producto.imagen_url }}" alt="{{ producto.producto_nombre }}">
+        {% endif %}
+        <h3>{{ producto.producto_nombre }}</h3>
+        <p class="description">{{ producto.producto_descripcion }}</p>
+        <p class="price">Bs. {{ "%.2f"|format(producto.producto_precio or 0) }}</p>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </main>
+
+  <footer>
+    &copy; 2025 Virtual Papers Scz | Papelería que inspira en rosa 🌸
+  </footer>
+</body>
+
+</html>

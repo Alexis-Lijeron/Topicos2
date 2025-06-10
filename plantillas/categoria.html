@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Virtual Papers Scz - Categorías</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #333;
+    }
+
+    header {
+      background: #e6f0f3;
+      padding: 2rem;
+      text-align: center;
+      border-bottom: 4px solid #cce0eb;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      color: #327287;
+      text-transform: uppercase;
+      margin: 0;
+    }
+
+    header p {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+      color: #555;
+    }
+
+    .promo-banner {
+      background: #d9eef4;
+      text-align: center;
+      padding: 1rem;
+      margin: 1rem auto;
+      border-radius: 8px;
+      color: #215d73;
+      font-weight: bold;
+      max-width: 90%;
+    }
+
+    main {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    .category-title {
+      font-size: 1.5rem;
+      color: #2d5c6a;
+      margin: 2rem 0 0.5rem;
+      border-bottom: 2px solid #b6d8e2;
+      padding-bottom: 0.4rem;
+    }
+
+    .category-description {
+      font-size: 0.95rem;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .product-card {
+      width: 46%;
+      margin: 2%;
+      float: left;
+      border: 1px solid #c0e0e8;
+      border-radius: 12px;
+      background: #f7fcfd;
+      padding: 1rem;
+      box-sizing: border-box;
+      page-break-inside: avoid;
+    }
+
+    .product-card img {
+      display: block;
+      margin: 0 auto 0.8rem auto;
+      max-width: 100%;
+      max-height: 160px;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+
+    .product-card h4 {
+      font-size: 1.1rem;
+      color: #2f6b7e;
+      margin: 0 0 0.3rem;
+      text-align: center;
+    }
+
+    .product-card .description {
+      font-size: 0.9rem;
+      color: #555;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .product-card .price {
+      font-size: 1rem;
+      font-weight: bold;
+      color: #174e5a;
+      text-align: center;
+    }
+
+    footer {
+      clear: both;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #999;
+      margin-top: 3rem;
+      padding-bottom: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Virtual Papers Scz</h1>
+    <p>Cliente: {{ nombre }} | Correo: {{ correo }}</p>
+  </header>
+
+  <div class="promo-banner">
+    ¡No te lo pierdas! Explora las categorías que combinan contigo.
+  </div>
+
+  <main>
+    {% for category in categories %}
+    <div>
+      <h2 class="category-title">{{ category.categoria_nombre }}</h2>
+      <p class="category-description">{{ category.categoria_descripcion }}</p>
+
+      {% for product in category.productos %}
+      <div class="product-card">
+        {% if product.imagen_url %}
+        <img src="{{ product.imagen_url }}" alt="{{ product.producto_nombre }}">
+        {% endif %}
+        <h4>{{ product.producto_nombre }}</h4>
+        <p class="description">{{ product.producto_descripcion }}</p>
+        <p class="price">Bs. {{ "%.2f"|format(product.producto_precio or 0) }}</p>
+      </div>
+      {% endfor %}
+
+      <!-- 👇 Solución: limpiar flotantes por categoría -->
+      <div style="clear: both;"></div>
+    </div>
+    {% endfor %}
+  </main>
+
+  <footer>
+    &copy; 2025 Virtual Papers Scz | Papelería que inspira
+  </footer>
+</body>
+</html>
